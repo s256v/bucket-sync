@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  bitbucket-cloner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bitbucket-cloner
+    environment:
+      BITBUCKET_EMAIL: ${BITBUCKET_EMAIL}
+      BITBUCKET_API_TOKEN: ${BITBUCKET_API_TOKEN}
+      GIT_SSH_COMMAND: 'ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no'
+    volumes:
+      - ./repos:/app/bitbucket_repos
+      - ~/.ssh/id_rsa:/root/.ssh/id_rsa:ro
+      - ~/.ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:ro
+      - ~/.ssh/known_hosts:/root/.ssh/known_hosts:ro
+    tty: true
