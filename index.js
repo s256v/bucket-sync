@@ -3,6 +3,9 @@ import { mande } from 'mande'
 import fs from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 const ROOT_DIR = process.env.CLONE_DIR || './bitbucket_repos'
 
@@ -64,8 +67,9 @@ async function main() {
     }
 
     const repos = await getAllRepos(email, token)
-    const workspaceSet = new Set()
+    console.log(`Repos found ${repos.length}`);
 
+    const workspaceSet = new Set()
     for (const repo of repos) {
         const workspace = repo.workspace?.slug || repo.owner?.username || 'unknown_workspace'
 
@@ -83,4 +87,4 @@ async function main() {
     console.log('Done!')
 }
 
-main()
+main();
