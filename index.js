@@ -35,7 +35,7 @@ async function getAllRepos(email, token) {
         workspaceUrl = wsResponse.next || null
     }
 
-    return repos
+    return repos.sort((a, b) => a.full_name.localeCompare(b.full_name))
 }
 
 function runGitCommand(args, cwd) {
