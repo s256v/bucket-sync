@@ -10,20 +10,29 @@ dotenv.config();
 const ROOT_DIR = process.env.CLONE_DIR || './bitbucket_repos'
 
 async function getAllRepos(email, token) {
-    let url = 'https://api.bitbucket.org/2.0/repositories?role=member&pagelen=100'
     const repos = []
-
     const auth = `${email}:${token}`
+    const authHeader = { Authorization: `Basic ${Buffer.from(auth).toString('base64')}` }
 
-    while (url) {
-        const api = mande(url)
-        api.options.headers = {
-            Authorization: `Basic ${Buffer.from(auth).toString('base64')}`
+    let workspaceUrl = 'https://api.bitbucket.org/2.0/user/workspaces?pagelen=100'
+
+    while (workspaceUrl) {
+        const wsApi = mande(workspaceUrl)
+        wsApi.options.headers = authHeader
+        const wsResponse = await wsApi.get()
+
+        for (const item of wsResponse.values) {
+            const workspace = item.workspace
+            let repoUrl = `https://api.bitbucket.org/2.0/repositories/${workspace.slug}?pagelen=100`
+            while (repoUrl) {
+                const repoApi = mande(repoUrl)
+                repoApi.options.headers = authHeader
+                const repoResponse = await repoApi.get()
+                repos.push(...repoResponse.values)
+                repoUrl = repoResponse.next || null
+            }
         }
-
-        const response = await api.get()
-        repos.push(...response.values)
-        url = response.next || null
+        workspaceUrl = wsResponse.next || null
     }
 
     return repos
